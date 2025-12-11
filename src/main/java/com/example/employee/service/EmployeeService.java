@@ -1,10 +1,10 @@
 package com.example.employee.service;
 
-import com.example.employee.dto.EmployeeRequestDTO;
-import com.example.employee.dto.EmployeeResponseDTO;
-import com.example.employee.dto.EmployeeResponseForGetAll;
+import com.example.employee.dto.*;
+import com.example.employee.enums.BloodGroup;
 import org.jspecify.annotations.Nullable;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -15,4 +15,23 @@ public interface EmployeeService {
  void deleteById(Long id);
  EmployeeResponseDTO update(Long id, EmployeeRequestDTO employeeRequestDTO);
  EmployeeResponseDTO updatePatch(Long id, Map<String, Object> updates);
+ EmployeeResponseForGetAll getByNameAndEmail(String name, String email);
+ List<EmployeeResponseForGetAll> getByNameOrEmail(String name, String email);
+ List<EmployeeResponseForGetAll> getBySalaryBetween(String startingSalary, String endingSalary);
+ List<EmployeeResponseForGetAll> getByNameLike(String name);
+ List<EmployeeResponseForGetAll> getByName(String name);
+ List<EmployeeResponseForGetAll> getByNameIgnoreCase(String name);
+ List<EmployeeResponseForGetAll> getByNameContaining(String name);
+ List<EmployeeResponseForGetAll> getTop3ByOrderByEmployeeNameDesc();
+ List<EmployeeResponseForGetAll> getFirst3ByOrderByEmployeeNameDesc();
+ List<EmployeeResponseForGetAll> getAllByOrderByEmployeeNameDesc();
+ List<EmployeeResponseForDate> getByBirthDateBefore(String birthDate);
+ List<EmployeeResponseForDate> getByBirthDateAfter(String birthDate);
+ List<EmployeeResponseForBloodGroup> getDistinctByBloodGroup(BloodGroup bloodGroup);
+ List<EmployeeResponseForGetAll> getByNameIn(String name);
+ List<EmployeeResponseForGetAll> getByNameNotIn(String name);
+ List<EmployeeResponseForGetAll> getByBirthDateIn(String birthDate);
+ List<EmployeeResponseForGetAll> getByBirthDateNotIn(String birthDate);
+ List<EmployeeResponseForGetAll> getBySalaryIn(String salary);
+ List<EmployeeResponseForGetAll> getBySalaryNotIn(String salary);
 }
