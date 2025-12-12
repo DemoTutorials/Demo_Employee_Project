@@ -1,5 +1,7 @@
 package com.example.employee.entity;
 
+import com.example.employee.encryption_configuration.encryption_converters.EncryptedLocalDateConverter;
+import com.example.employee.encryption_configuration.encryption_converters.EncryptedStringConverter;
 import com.example.employee.enums.BloodGroup;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -17,18 +19,22 @@ public class Employee {
     @Column(name = "id")
     private Long employeeId;
 
-    @Column(name = "name",nullable = false,length = 20)
+    @Convert(converter = EncryptedStringConverter.class)
+    @Column(name = "name",nullable = false)
     private String employeeName;
 
-    @Column(name = "email",nullable = false,length = 50,unique = true)
+    @Convert(converter = EncryptedStringConverter.class)
+    @Column(name = "email",nullable = false,unique = true)
     private String email;
 
+    @Convert(converter = EncryptedLocalDateConverter.class)
     @Column(name = "birth_date",nullable = false)
     private LocalDate birthDate;
 
     @Column(name = "salary",nullable = false)
     private BigDecimal salary;
 
+    @Convert(converter = EncryptedStringConverter.class)
     @Column(name = "permanent_address",nullable = false)
     private String permanentAddress;
 
