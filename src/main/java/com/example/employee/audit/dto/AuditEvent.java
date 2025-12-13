@@ -1,13 +1,16 @@
 package com.example.employee.audit.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Column;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AuditEvent {
     private String entityType;
     private Long entityId;
     private String operation;
+    @Column(columnDefinition = "TEXT")
     private String oldValue;
+    @Column(columnDefinition = "TEXT")
     private String newValue;
 
     public AuditEvent() {

@@ -178,4 +178,23 @@ public class EmployeeController {
     public ResponseEntity<EmployeeResponseDTO> createAudit(@RequestBody EmployeeRequestDTO employeeRequestDTO){
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.createAudit(employeeRequestDTO));
     }
+
+    // UPDATE-AUDIT
+    @PutMapping("/updateAudit/{id}")
+    public ResponseEntity<EmployeeResponseDTO> updateAudit(@PathVariable Long id, @RequestBody EmployeeRequestDTO employeeRequestDTO){
+        return ResponseEntity.status(HttpStatus.OK).body(employeeService.updateAudit(id,employeeRequestDTO));
+    }
+
+    // UPDATE & AUDIT SPECIFIC FIELD
+    @PatchMapping("/PatchAudit/{id}")
+    public ResponseEntity<EmployeeResponseDTO> updatePatchAudit(@PathVariable Long id, @RequestBody Map<String,Object> updates){
+        return ResponseEntity.status(HttpStatus.OK).body(employeeService.updatePatchAudit(id,updates));
+    }
+
+    // DELETE-AUDIT
+    @DeleteMapping("/DeleteByIdForAudit/{id}")
+    public ResponseEntity<Void> DeleteByIdForAudit(@PathVariable Long id){
+        employeeService.DeleteByIdForAudit(id);
+        return ResponseEntity.noContent().build();
+    }
 }

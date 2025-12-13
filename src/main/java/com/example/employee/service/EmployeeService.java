@@ -32,4 +32,7 @@ public interface EmployeeService {
  List<EmployeeResponseForGetAll> getBySalaryIn(String salary);
  List<EmployeeResponseForGetAll> getBySalaryNotIn(String salary);
  EmployeeResponseDTO createAudit(EmployeeRequestDTO employeeRequestDTO);
+ EmployeeResponseDTO updateAudit(Long id, EmployeeRequestDTO employeeRequestDTO);
+ void DeleteByIdForAudit(Long id);
+ EmployeeResponseDTO updatePatchAudit(Long id, Map<String, Object> updates);
 }
