@@ -170,4 +170,12 @@ public class EmployeeController {
     public ResponseEntity<List<EmployeeResponseForGetAll>> getBySalaryNotIn(@PathVariable String salary){
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.getBySalaryNotIn(salary));
     }
+
+    // Audit
+
+    // CREATE-AUDIT
+    @PostMapping("/createAudit")
+    public ResponseEntity<EmployeeResponseDTO> createAudit(@RequestBody EmployeeRequestDTO employeeRequestDTO){
+        return ResponseEntity.status(HttpStatus.OK).body(employeeService.createAudit(employeeRequestDTO));
+    }
 }

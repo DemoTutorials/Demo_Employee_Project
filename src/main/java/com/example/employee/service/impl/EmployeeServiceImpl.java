@@ -1,12 +1,16 @@
 package com.example.employee.service.impl;
 
+import com.example.employee.audit.dto.AuditEvent;
 import com.example.employee.dto.*;
 import com.example.employee.entity.Employee;
 import com.example.employee.enums.BloodGroup;
 import com.example.employee.repository.EmployeeRepository;
 import com.example.employee.service.EmployeeService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -14,17 +18,20 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final ModelMapper modelMapper;
+    private final KafkaTemplate<String,AuditEvent> kafkaTemplate;
+    private final ObjectMapper objectMapper;
 
-    public EmployeeServiceImpl(EmployeeRepository employeeRepository, ModelMapper modelMapper) {
+    public EmployeeServiceImpl(EmployeeRepository employeeRepository, ModelMapper modelMapper, KafkaTemplate<String, AuditEvent> kafkaTemplate, ObjectMapper objectMapper) {
         this.employeeRepository = employeeRepository;
         this.modelMapper = modelMapper;
+        this.kafkaTemplate = kafkaTemplate;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -113,10 +120,14 @@ public class EmployeeServiceImpl implements EmployeeService {
         List<EmployeeResponseForGetAll> NewEmployeeNameOrEmail = employeeNameOrEmail.stream().map(employee -> modelMapper.map(employee, EmployeeResponseForGetAll.class)).toList();
         return NewEmployeeNameOrEmail;
     }
-
+    /* Change */
     @Override
     public List<EmployeeResponseForGetAll> getBySalaryBetween(String startingSalary, String endingSalary) {
-        List<Employee> bySalaryBetween = employeeRepository.findBySalaryBetween(startingSalary, endingSalary);
+        /* Change START*/
+        BigDecimal start=new BigDecimal(startingSalary);
+        BigDecimal end=new BigDecimal(endingSalary);
+        /* Change END*/
+        List<Employee> bySalaryBetween = employeeRepository.findBySalaryBetween(start, end);
         List<EmployeeResponseForGetAll> list = bySalaryBetween.stream().map(employee -> modelMapper.map(employee, EmployeeResponseForGetAll.class)).toList();
         return list;
     }
@@ -239,6 +250,22 @@ public class EmployeeServiceImpl implements EmployeeService {
         List<Employee> bySalaryNotIn = employeeRepository.findBySalaryNotIn(salarys);
         List<EmployeeResponseForGetAll> list = bySalaryNotIn.stream().map(employee -> modelMapper.map(employee, EmployeeResponseForGetAll.class)).toList();
         return list;
+    }
+
+    @Override
+    public EmployeeResponseDTO createAudit(EmployeeRequestDTO employeeRequestDTO) {
+        Employee employee = modelMapper.map(employeeRequestDTO, Employee.class);
+        Employee newEmployee = employeeRepository.save(employee);
+        try{
+            // Audit Process
+            String newEmployeeJson = objectMapper.writeValueAsString(newEmployee);
+            AuditEvent auditEvent=new AuditEvent("Employee",newEmployee.getEmployeeId(),"CREATE",null,newEmployeeJson);
+            kafkaTemplate.send("emp-topic",auditEvent);
+        }
+        catch(Exception e){
+            System.err.println("Failed to Publish Create Audit Event"+e);
+        }
+        return modelMapper.map(newEmployee,EmployeeResponseDTO.class);
     }
 
 
