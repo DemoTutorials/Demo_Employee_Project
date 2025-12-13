@@ -6,6 +6,7 @@ import com.example.employee.entity.Employee;
 import com.example.employee.enums.BloodGroup;
 import com.example.employee.repository.EmployeeRepository;
 import com.example.employee.service.EmployeeService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -257,8 +258,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = modelMapper.map(employeeRequestDTO, Employee.class);
         Employee newEmployee = employeeRepository.save(employee);
         try{
-            // Audit Process
+            // CONVERT JAVA OBJECT TO JSON STRING
             String newEmployeeJson = objectMapper.writeValueAsString(newEmployee);
+            // Audit Process
             AuditEvent auditEvent=new AuditEvent("Employee",newEmployee.getEmployeeId(),"CREATE",null,newEmployeeJson);
             kafkaTemplate.send("emp-topic",auditEvent);
         }
@@ -266,6 +268,118 @@ public class EmployeeServiceImpl implements EmployeeService {
             System.err.println("Failed to Publish Create Audit Event"+e);
         }
         return modelMapper.map(newEmployee,EmployeeResponseDTO.class);
+    }
+
+    @Override
+    public EmployeeResponseDTO updateAudit(Long id, EmployeeRequestDTO employeeRequestDTO) {
+        Employee employee = employeeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Employee Not Found By ID" + id));
+        // CONVERT JAVA OBJECT TO JSON STRING
+        String employeeJson;
+        try {
+            employeeJson= objectMapper.writeValueAsString(employee);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        modelMapper.map(employeeRequestDTO,employee);
+        Employee newEmployee = employeeRepository.save(employee);
+        // CONVERT JAVA OBJECT TO JSON STRING
+        String newEmployeeJson;
+        try {
+            newEmployeeJson= objectMapper.writeValueAsString(newEmployee);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        try{
+            // Audit Process
+            AuditEvent auditEvent=new AuditEvent("Employee",newEmployee.getEmployeeId(),"UPDATE",employeeJson,newEmployeeJson);
+            kafkaTemplate.send("emp-topic",auditEvent);
+        }
+        catch(Exception e){
+            System.err.println("Failed To Publish Update Event:- "+e);
+        }
+        return modelMapper.map(newEmployee, EmployeeResponseDTO.class);
+    }
+
+    @Override
+    public void DeleteByIdForAudit(Long id) {
+        Employee employee = employeeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Employee No Found By ID:-" + id));
+        // CONVERT JAVA OBJECT TO JSON STRING
+        String deleteEmployeeJson;
+        try {
+            deleteEmployeeJson=objectMapper.writeValueAsString(employee);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        try
+        {
+            // Audit Process
+            AuditEvent auditEvent=new AuditEvent("Employee",employee.getEmployeeId(),"DELETE",deleteEmployeeJson,null);
+            kafkaTemplate.send("emp-topic",auditEvent);
+        }
+        catch(Exception e){
+            System.err.println("Failed To Publish DELETE Event:- "+e);
+        }
+        employeeRepository.deleteById(id);
+    }
+
+    @Override
+    public EmployeeResponseDTO updatePatchAudit(Long id, Map<String, Object> updates) {
+        Employee employee = employeeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Employee Not Found By ID" + id));
+        // CONVERT JAVA OBJECT TO JSON STRING
+        String employeeJson;
+        try {
+           employeeJson= objectMapper.writeValueAsString(employee);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        updates.forEach((field,value)->{
+            switch(field){
+                case "employeeName":employee.setEmployeeName((String) value);
+                    break;
+                case "email":employee.setEmail((String) value);
+                    break;
+                case "birthDate":
+                    if(value instanceof String){
+                        DateTimeFormatter dateTimeFormatter=DateTimeFormatter.ofPattern("dd-MMM-yyyy");
+                        employee.setBirthDate(LocalDate.parse((String) value,dateTimeFormatter));
+                    }
+                    break;
+                case "salary":
+                    if(value instanceof Double){
+                        employee.setSalary(BigDecimal.valueOf((Double) value));
+                    }
+                    break;
+                case "permanentAddress":employee.setPermanentAddress((String) value);
+                    break;
+                case "bloodGroup":
+                    if(value instanceof String){
+                        employee.setBloodGroup(BloodGroup.valueOf((String) value));
+                    }else if(value instanceof BloodGroup){
+                        employee.setBloodGroup((BloodGroup) value);
+                    }
+                    break;
+                default:
+                    throw new RuntimeException("Field is Not Supported");
+            }
+        });
+        Employee newEmployee = employeeRepository.save(employee);
+        // CONVERT JAVA OBJECT TO JSON STRING
+        String newEmployeeJson;
+        try {
+            newEmployeeJson=objectMapper.writeValueAsString(newEmployee);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        try{
+            // Audit Process
+            AuditEvent auditEvent=new AuditEvent("Employee",newEmployee.getEmployeeId(),"UPDATE_PATCH",employeeJson,newEmployeeJson);
+            kafkaTemplate.send("emp-topic",auditEvent);
+        }
+        catch(Exception e){
+            System.err.println("Failed to Publish UPDATE PATCH Event:- "+e);
+        }
+        return modelMapper.map(newEmployee, EmployeeResponseDTO.class);
     }
 
 

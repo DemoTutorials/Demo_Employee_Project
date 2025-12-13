@@ -14,7 +14,9 @@ public class Audit {
     private String entityType;
     private Long entityId;
     private String operation;
+    @Column(columnDefinition = "TEXT")
     private String oldValue;
+    @Column(columnDefinition = "TEXT")
     private String newValue;
     @CreatedDate
     private LocalDateTime createdAt;
