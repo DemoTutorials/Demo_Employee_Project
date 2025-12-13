@@ -1,5 +1,6 @@
 package com.example.employee.entity;
 
+import com.example.employee.encryption_configuration.encryption_converters.EncryptedBloodGroupConverter;
 import com.example.employee.encryption_configuration.encryption_converters.EncryptedLocalDateConverter;
 import com.example.employee.encryption_configuration.encryption_converters.EncryptedStringConverter;
 import com.example.employee.enums.BloodGroup;
@@ -38,7 +39,7 @@ public class Employee {
     @Column(name = "permanent_address",nullable = false)
     private String permanentAddress;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = EncryptedBloodGroupConverter.class)
     @Column(name = "blood_group",nullable = false)
     private BloodGroup bloodGroup;
 
