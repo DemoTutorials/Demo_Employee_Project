@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface EmployeeRepository extends JpaRepository<Employee,Long> {
     Optional<Employee> findByEmployeeNameAndEmail(String name, String email);
     List<Employee> findByEmployeeNameOrEmail(String name, String email);
-    List<Employee> findBySalaryBetween(String startingSalary, String endingSalary);
+    List<Employee> findBySalaryBetween(BigDecimal startingSalary, BigDecimal endingSalary); // Change BigDecimal instead of String
     List<Employee> findByEmployeeNameLike(String name);
     List<Employee> findByEmployeeName(String name);
     List<Employee> findByEmployeeNameIgnoreCase(String name);

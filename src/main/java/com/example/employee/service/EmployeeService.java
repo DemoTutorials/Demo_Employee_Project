@@ -2,9 +2,6 @@ package com.example.employee.service;
 
 import com.example.employee.dto.*;
 import com.example.employee.enums.BloodGroup;
-import org.jspecify.annotations.Nullable;
-
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -34,4 +31,5 @@ public interface EmployeeService {
  List<EmployeeResponseForGetAll> getByBirthDateNotIn(String birthDate);
  List<EmployeeResponseForGetAll> getBySalaryIn(String salary);
  List<EmployeeResponseForGetAll> getBySalaryNotIn(String salary);
+ EmployeeResponseDTO createAudit(EmployeeRequestDTO employeeRequestDTO);
 }
