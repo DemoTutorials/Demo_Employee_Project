@@ -1,6 +1,7 @@
 package com.example.employee.security.auth_util;
 
 import com.example.employee.security.entity.User;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,5 +30,11 @@ public class AuthUtil {
                 .expiration(new Date(System.currentTimeMillis()+1000*60*10))
                 .signWith(getSecretKey())
                 .compact();
+    }
+
+
+    public String getUserFromToken(String token) {
+      Claims claims = Jwts.parser().verifyWith(getSecretKey()).build().parseSignedClaims(token).getPayload();
+        return claims.getSubject();
     }
 }
