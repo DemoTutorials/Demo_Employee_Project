@@ -3,9 +3,12 @@ package com.example.employee.controller;
 import com.example.employee.dto.*;
 import com.example.employee.enums.BloodGroup;
 import com.example.employee.service.EmployeeService;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.Map;
 
@@ -196,5 +199,52 @@ public class EmployeeController {
     public ResponseEntity<Void> DeleteByIdForAudit(@PathVariable Long id){
         employeeService.DeleteByIdForAudit(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // CREATE For UPLOAD-FILE
+    @PostMapping("/createEmpWithFile")
+    public ResponseEntity<EmployeeWithFileResponseDTO> createEmpWithFile(@RequestBody EmployeeWithFileRequestDTO employeeWithFileRequestDTO){
+        return ResponseEntity.status(HttpStatus.OK).body(employeeService.createEmpWithFile(employeeWithFileRequestDTO));
+    }
+
+    // UPLOAD-FILE
+    // If Employee-ID it Exists into the DB then Upload the File against that ID
+    @GetMapping("/upload-file/{id}")
+    public ResponseEntity<FileDTO> uploadFile(@PathVariable Long id, @RequestParam("file") MultipartFile file){
+        return ResponseEntity.status(HttpStatus.OK).body(employeeService.uploadFile(id,file));
+    }
+
+    // UPLOAD-FILE
+    // If Employee-ID it Exists into the DB then Upload the File against that ID
+    // File Store Less than 1MB
+    @GetMapping("/upload-file/file-size/{id}")
+    public ResponseEntity<?> uploadFileWithFileSize(@PathVariable Long id, @RequestParam("file") MultipartFile file){
+        long maxSize=1024*1024*1;
+        if(file.getSize()>maxSize){
+            return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body("File Size Exceed than 1MB... Please Select Smaller File !..");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(employeeService.uploadFile(id,file));
+    }
+
+    // UPLOAD-FILE
+    // If Employee-ID it Exists into the DB then Upload the File against that ID
+    // File Store Less than 1MB
+    // Allowed Only '.jpg' or '.pdf' File type
+    @GetMapping("/upload-file/file-size/file-extension/{id}")
+    public ResponseEntity<?> uploadFileWithFileSizeAndExtension(@PathVariable Long id, @RequestParam("file") MultipartFile file){
+        long maxSize=1024*1024*1;
+        if(file.getSize()>maxSize){
+            return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body("File Size Exceed than 1MB... Please Select Smaller File !..");
+        }
+        String originalFilename = file.getOriginalFilename();
+        if(originalFilename==null || !isAllowedExtension(originalFilename)){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid File Extension... Please Choose Valid File Type !...");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(employeeService.uploadFile(id,file));
+    }
+
+    private boolean isAllowedExtension(String originalFilename) {
+        String lowerCase = originalFilename.toLowerCase();
+        return lowerCase.endsWith(".jpg") | lowerCase.endsWith(".pdf");
     }
 }

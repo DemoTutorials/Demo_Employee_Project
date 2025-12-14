@@ -11,10 +11,11 @@ import org.springframework.data.annotation.LastModifiedDate;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 @Entity
-@Table(name = "emp", schema = "employee")
-public class Employee {
+@Table(name = "emp_file", schema = "employee")
+public class EmployeeWithFile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -43,6 +44,15 @@ public class Employee {
     @Column(name = "blood_group", nullable = false)
     private BloodGroup bloodGroup;
 
+    @Column(columnDefinition = "Text")
+    private String fileName;
+
+    @Column(name = "extension")
+    private String fileType;
+
+    @Lob
+    private byte[] fileData;
+
     @CreatedDate
     @Column(name = "created_datetime")
     private LocalDateTime createdAt;
@@ -61,10 +71,10 @@ public class Employee {
         updatedAt = LocalDateTime.now();
     }
 
-    public Employee() {
+    public EmployeeWithFile() {
     }
 
-    public Employee(Long employeeId, String employeeName, String email, LocalDate birthDate, BigDecimal salary, String permanentAddress, BloodGroup bloodGroup, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public EmployeeWithFile(Long employeeId, String employeeName, String email, LocalDate birthDate, BigDecimal salary, String permanentAddress, BloodGroup bloodGroup, String fileName, String fileType, byte[] fileData, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.employeeId = employeeId;
         this.employeeName = employeeName;
         this.email = email;
@@ -72,6 +82,9 @@ public class Employee {
         this.salary = salary;
         this.permanentAddress = permanentAddress;
         this.bloodGroup = bloodGroup;
+        this.fileName = fileName;
+        this.fileType = fileType;
+        this.fileData = fileData;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -132,6 +145,30 @@ public class Employee {
         this.bloodGroup = bloodGroup;
     }
 
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
+    public byte[] getFileData() {
+        return fileData;
+    }
+
+    public void setFileData(byte[] fileData) {
+        this.fileData = fileData;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -150,7 +187,7 @@ public class Employee {
 
     @Override
     public String toString() {
-        return "Employee{" +
+        return "EmployeeWithFile{" +
                 "employeeId=" + employeeId +
                 ", employeeName='" + employeeName + '\'' +
                 ", email='" + email + '\'' +
@@ -158,6 +195,9 @@ public class Employee {
                 ", salary=" + salary +
                 ", permanentAddress='" + permanentAddress + '\'' +
                 ", bloodGroup=" + bloodGroup +
+                ", fileName='" + fileName + '\'' +
+                ", fileType='" + fileType + '\'' +
+                ", fileData=" + Arrays.toString(fileData) +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 '}';

@@ -1,70 +1,28 @@
-package com.example.employee.entity;
+package com.example.employee.dto;
 
-import com.example.employee.encryption_configuration.encryption_converters.EncryptedBloodGroupConverter;
-import com.example.employee.encryption_configuration.encryption_converters.EncryptedLocalDateConverter;
-import com.example.employee.encryption_configuration.encryption_converters.EncryptedStringConverter;
 import com.example.employee.enums.BloodGroup;
-import jakarta.persistence.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "emp", schema = "employee")
-public class Employee {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+public class EmployeeWithFileResponseDTO {
     private Long employeeId;
-
-    @Convert(converter = EncryptedStringConverter.class)
-    @Column(name = "name", nullable = false)
     private String employeeName;
-
-    @Convert(converter = EncryptedStringConverter.class)
-    @Column(name = "email", nullable = false, unique = true)
     private String email;
-
-    @Convert(converter = EncryptedLocalDateConverter.class)
-    @Column(name = "birth_date", nullable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "dd-MMM-yyyy")
     private LocalDate birthDate;
-
-    @Column(name = "salary", nullable = false)
     private BigDecimal salary;
-
-    @Convert(converter = EncryptedStringConverter.class)
-    @Column(name = "permanent_address", nullable = false)
     private String permanentAddress;
-
-    @Convert(converter = EncryptedBloodGroupConverter.class)
-    @Column(name = "blood_group", nullable = false)
     private BloodGroup bloodGroup;
-
-    @CreatedDate
-    @Column(name = "created_datetime")
     private LocalDateTime createdAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_datetime")
     private LocalDateTime updatedAt;
 
-    @PrePersist
-    protected void create() {
-        createdAt = LocalDateTime.now();
+    public EmployeeWithFileResponseDTO() {
     }
 
-    @PreUpdate
-    protected void update() {
-        updatedAt = LocalDateTime.now();
-    }
-
-    public Employee() {
-    }
-
-    public Employee(Long employeeId, String employeeName, String email, LocalDate birthDate, BigDecimal salary, String permanentAddress, BloodGroup bloodGroup, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public EmployeeWithFileResponseDTO(Long employeeId, String employeeName, String email, LocalDate birthDate, BigDecimal salary, String permanentAddress, BloodGroup bloodGroup, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.employeeId = employeeId;
         this.employeeName = employeeName;
         this.email = email;
@@ -150,7 +108,7 @@ public class Employee {
 
     @Override
     public String toString() {
-        return "Employee{" +
+        return "EmployeeResponseDTO{" +
                 "employeeId=" + employeeId +
                 ", employeeName='" + employeeName + '\'' +
                 ", email='" + email + '\'' +

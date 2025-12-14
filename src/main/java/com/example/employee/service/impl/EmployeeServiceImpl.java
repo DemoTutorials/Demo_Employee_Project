@@ -3,14 +3,17 @@ package com.example.employee.service.impl;
 import com.example.employee.audit.dto.AuditEvent;
 import com.example.employee.dto.*;
 import com.example.employee.entity.Employee;
+import com.example.employee.entity.EmployeeWithFile;
 import com.example.employee.enums.BloodGroup;
 import com.example.employee.repository.EmployeeRepository;
+import com.example.employee.repository.EmployeeWithFileRepository;
 import com.example.employee.service.EmployeeService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.math.BigDecimal;
@@ -24,12 +27,14 @@ import java.util.Map;
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeRepository employeeRepository;
+    private final EmployeeWithFileRepository employeeWithFileRepository;
     private final ModelMapper modelMapper;
     private final KafkaTemplate<String,AuditEvent> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    public EmployeeServiceImpl(EmployeeRepository employeeRepository, ModelMapper modelMapper, KafkaTemplate<String, AuditEvent> kafkaTemplate, ObjectMapper objectMapper) {
+    public EmployeeServiceImpl(EmployeeRepository employeeRepository, EmployeeWithFileRepository employeeWithFileRepository, ModelMapper modelMapper, KafkaTemplate<String, AuditEvent> kafkaTemplate, ObjectMapper objectMapper) {
         this.employeeRepository = employeeRepository;
+        this.employeeWithFileRepository = employeeWithFileRepository;
         this.modelMapper = modelMapper;
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
@@ -380,6 +385,28 @@ public class EmployeeServiceImpl implements EmployeeService {
             System.err.println("Failed to Publish UPDATE PATCH Event:- "+e);
         }
         return modelMapper.map(newEmployee, EmployeeResponseDTO.class);
+    }
+
+    @Override
+    public FileDTO uploadFile(Long id, MultipartFile file) {
+        EmployeeWithFile employeeWithFile = employeeWithFileRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Employee not found By ID:-" + id));
+        try{
+            employeeWithFile.setFileName(file.getOriginalFilename());
+            employeeWithFile.setFileType(file.getContentType());
+            employeeWithFile.setFileData(file.getBytes());
+        }
+        catch(Exception e){
+            throw new RuntimeException("File Upload Failed"+e);
+        }
+        EmployeeWithFile newEmployeeWithFile = employeeWithFileRepository.save(employeeWithFile);
+        return new FileDTO(newEmployeeWithFile.getFileName(), newEmployeeWithFile.getFileType(),newEmployeeWithFile.getFileData());
+    }
+
+    @Override
+    public EmployeeWithFileResponseDTO createEmpWithFile(EmployeeWithFileRequestDTO employeeWithFileRequestDTO) {
+        EmployeeWithFile employeeWithFile = modelMapper.map(employeeWithFileRequestDTO, EmployeeWithFile.class);
+        EmployeeWithFile newEmployeeWithFile = employeeWithFileRepository.save(employeeWithFile);
+        return modelMapper.map(newEmployeeWithFile, EmployeeWithFileResponseDTO.class);
     }
 
 
