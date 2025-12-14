@@ -2,6 +2,8 @@ package com.example.employee.service;
 
 import com.example.employee.dto.*;
 import com.example.employee.enums.BloodGroup;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.Map;
 
@@ -35,4 +37,6 @@ public interface EmployeeService {
  EmployeeResponseDTO updateAudit(Long id, EmployeeRequestDTO employeeRequestDTO);
  void DeleteByIdForAudit(Long id);
  EmployeeResponseDTO updatePatchAudit(Long id, Map<String, Object> updates);
+ FileDTO uploadFile(Long id, MultipartFile file);
+ EmployeeWithFileResponseDTO createEmpWithFile(EmployeeWithFileRequestDTO employeeWithFileRequestDTO);
 }
