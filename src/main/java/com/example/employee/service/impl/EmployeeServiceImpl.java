@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -409,5 +410,12 @@ public class EmployeeServiceImpl implements EmployeeService {
         return modelMapper.map(newEmployeeWithFile, EmployeeWithFileResponseDTO.class);
     }
 
-
+    @Override
+    public FileDTO downloadFile(Long id) {
+        EmployeeWithFile employeeWithFile = employeeWithFileRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Employ Not Found with ID" + id));
+        if(employeeWithFile.getFileData()==null){
+            throw new RuntimeException("Failed to get File Details");
+        }
+        return new FileDTO( employeeWithFile.getFileName(),employeeWithFile.getFileType(), employeeWithFile.getFileData());
+    }
 }

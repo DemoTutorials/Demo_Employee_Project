@@ -39,4 +39,5 @@ public interface EmployeeService {
  EmployeeResponseDTO updatePatchAudit(Long id, Map<String, Object> updates);
  FileDTO uploadFile(Long id, MultipartFile file);
  EmployeeWithFileResponseDTO createEmpWithFile(EmployeeWithFileRequestDTO employeeWithFileRequestDTO);
+ FileDTO downloadFile(Long id);
 }
