@@ -47,7 +47,6 @@ public class EmployeeWithFile {
     @Column(columnDefinition = "Text")
     private String fileName;
 
-    @Column(name = "extension")
     private String fileType;
 
     @Lob

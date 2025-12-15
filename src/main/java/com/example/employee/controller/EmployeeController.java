@@ -4,11 +4,16 @@ import com.example.employee.dto.*;
 import com.example.employee.enums.BloodGroup;
 import com.example.employee.service.EmployeeService;
 import org.apache.coyote.Response;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -246,5 +251,52 @@ public class EmployeeController {
     private boolean isAllowedExtension(String originalFilename) {
         String lowerCase = originalFilename.toLowerCase();
         return lowerCase.endsWith(".jpg") | lowerCase.endsWith(".pdf");
+    }
+
+    // Download-file
+    @GetMapping("/download-file/{id}")
+    public ResponseEntity<?> downloadFile(@PathVariable Long id){
+        FileDTO fileDTO=employeeService.downloadFile(id);
+        return ResponseEntity.
+                ok()
+                .contentType(MediaType.parseMediaType(fileDTO.getFileType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=\""+fileDTO.getFileName()+"\"").body(fileDTO.getFileData());
+    }
+
+    @GetMapping("/download-file/file-location/{id}")
+    public ResponseEntity<?> downloadFileInSpecificLocation(@PathVariable Long id,@RequestParam("fileLocation") String fileLocation){
+       FileDTO fileDTO = employeeService.downloadFile(id);
+       try{
+           Path directoryPath = Paths.get(fileLocation);
+           // Ensure if directoryPath is Exists or not
+           if(!Files.exists(directoryPath)){
+               Files.createDirectories(directoryPath);
+           }
+
+           // Extract filename & extension
+           String originalFileName = fileDTO.getFileName();
+           String fileName=originalFileName;
+           String baseName=originalFileName;
+           String extension="";
+
+           int dotIndex = originalFileName.lastIndexOf(".");
+           if(dotIndex!=-1){
+               baseName=originalFileName.substring(0,dotIndex);
+               extension=originalFileName.substring(dotIndex);
+           }
+
+           Path filePath = directoryPath.resolve(fileName);
+           int counter=1;
+           while(Files.exists(filePath)){
+               fileName=baseName+extension;
+               filePath = directoryPath.resolve(fileName);
+               counter++;
+           }
+           Files.write(filePath,fileDTO.getFileData());
+           return ResponseEntity.status(HttpStatus.OK).body("Successfully Save file"+filePath.toString());
+       }
+       catch(Exception e){
+           throw new RuntimeException("Failed to Save File"+e);
+       }
     }
 }
